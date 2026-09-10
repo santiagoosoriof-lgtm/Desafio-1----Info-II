@@ -1,19 +1,34 @@
-#include <QCoreApplication>
+#include <iostream>
+#include "tablero.h"
+using namespace std;
 
-int main(int argc, char *argv[])
-{
-    QCoreApplication a(argc, argv);
+/* Aqui se escribira el codigo para la interfaz en consola
+ *  y se llamaran todas las funciones creadas para que el juego funcione correctamente
+ por el momento aqui haremos las pruebas de depuracion de las funciones que vayamos creando*/
 
-    // Set up code that uses the Qt event loop here.
-    // Call QCoreApplication::quit() or QCoreApplication::exit() to quit the application.
-    // A not very useful example would be including
-    // #include <QTimer>
-    // near the top of the file and calling
-    // QTimer::singleShot(5000, &a, &QCoreApplication::quit);
-    // which quits the application after 5 seconds.
+int main() {
+    // Simulamos un tablero estándar de 3 filas y 4 columnas (12 fichas totales)
+    int filas = 3;
+    int columnas = 4;
+    int bytes_reservados = 0;
 
-    // If you do not need a running Qt event loop, remove the call
-    // to QCoreApplication::exec() or use the Non-Qt Plain C++ Application template.
+    unsigned char* mi_tablero = crear_tablero(filas, columnas, bytes_reservados);
 
-    return QCoreApplication::exec();
+    // Inyectamos valores manuales en la memoria para forzar los desalineamientos
+    // Cada byte representa combinaciones reales de fichas empaquetadas
+    if (bytes_reservados >= 5) {
+        mi_tablero[0] = 0b10001000; // Letras ABCDEF repetidas
+        mi_tablero[1] = 0b11000110; //
+        mi_tablero[2] = 0b00100010; //
+        mi_tablero[3] = 0b00011010; //
+        mi_tablero[4] = 0b00001011; // Bloque final de ceros (bits inválidos a la izquierda)
+    }
+
+    // crear funcion de visualizacion de la matriz para validar que la logica del guardado de la matriz sea correcta
+
+
+    // Destrucción del tablero para limpiar memoria
+    destruir_tablero(mi_tablero);
+
+    return 0;
 }

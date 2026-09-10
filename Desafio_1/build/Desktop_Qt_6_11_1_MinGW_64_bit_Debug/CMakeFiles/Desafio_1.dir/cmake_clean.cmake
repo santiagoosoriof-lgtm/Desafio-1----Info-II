@@ -6,6 +6,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/Desafio_1.dir/Desafio_1_autogen/mocs_compilation.cpp.obj.d"
   "CMakeFiles/Desafio_1.dir/main.cpp.obj"
   "CMakeFiles/Desafio_1.dir/main.cpp.obj.d"
+  "CMakeFiles/Desafio_1.dir/tablero.cpp.obj"
+  "CMakeFiles/Desafio_1.dir/tablero.cpp.obj.d"
   "Desafio_1.exe"
   "Desafio_1.exe.manifest"
   "Desafio_1.pdb"
