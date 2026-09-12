@@ -23,7 +23,7 @@ unsigned char* crear_tablero(int filas, int columnas, int &bytes_reservados){
 
 // Funcion para determinar la posicion de una ficha dentro del board dinamico
 
-unsigned char get_ficha(const unsigned char* tablero, int filas, int columnas, int fila, int columna){
+unsigned char get_ficha(const unsigned char* tablero, int columnas, int fila, int columna){
     // Formulas de mapeo
     int indice = (fila * columnas) + columna;  //encontramos el indice de la ficha en bits segun la posicion matricial de la ficha
     int bit_inicio = indice * 3;   //bit donde inicia la ficha
@@ -51,12 +51,42 @@ unsigned char get_ficha(const unsigned char* tablero, int filas, int columnas, i
 }
 
 // Funcion para modificar el valor de una ficha
-void set_ficha(unsigned char* tablero, int filas, int columnas, int fila, int columna, unsigned char nuevo_valor){
+void set_ficha(unsigned char* tablero, int columnas, int fila, int columna, unsigned char nuevo_valor){
     // Formulas de mapeo
     int indice = (fila * columnas) + columna;  //encontramos el indice de la ficha en bits segun la posicion matricial de la ficha
     int bit_inicio = indice * 3;   //bit donde inicia la ficha
     int byte_N = bit_inicio / 8;   // identificamos el numero del byte donde estamos almacenando la ficha
     int desplazamiento = bit_inicio % 8;  // identificamos si hay problema de frontera entre bits
+
+    // verificacion que la ficha ingresada solo tenga 3 bits
+    nuevo_valor &= 0x07;
+
+    if(desplazamiento >=0 && desplazamiento <= 5){
+        // caso 1 : ficha dentro de un solo byte
+        unsigned char limpiar = ~(0x007<<desplazamiento);
+        unsigned char byte_limpio = tablero[byte_N] & limpiar;
+        unsigned char nuevo_despl = nuevo_valor<<desplazamiento;
+        tablero[byte_N] = byte_limpio | nuevo_despl;
+
+    } else if(desplazamiento == 6){
+        //Caso 2 : Ficha separada 2 bits en byte N y 1 en byte N+1
+        unsigned char nuevo_n = nuevo_valor << 6;  // desplazamos los bits de la ficha nueva a la posicion de la ficha original en el byte N
+        unsigned char nuevo_n1 = nuevo_valor >> 2;  // desplazamos los bits de la ficha nueva a la posicion de la ficha original en el byte N+1
+        unsigned char byte_nlimpio = tablero[byte_N] & ~(0xC0); // aplico una mascara para poner en 0 los bits de la ficha original en byte N
+        unsigned char byte_n1limpio = tablero[byte_N+1] & ~(0x01);  // aplico una mascara para poner en 0 el bit de la ficha original en byte N+1
+        tablero[byte_N] = byte_nlimpio | nuevo_n; // agrego el nuevo valor al byte N
+        tablero[byte_N+1] = byte_n1limpio | nuevo_n1; //agrego el nuevo valor al byte N+1
+
+    } else if(desplazamiento == 7){
+        //Caso 3 : Ficha separada 1 bits en byte N y 2 en byte N+1
+        unsigned char nuevo_n = nuevo_valor << 7;  // desplazo los bits de la ficha nueva a la posicion de la ficha original en el byte N
+        unsigned char nuevo_n1 = nuevo_valor >> 1;  // desplazo los bits de la ficha nueva a la posicion de la ficha original en el byte N+1
+        unsigned char byte_nlimpio = tablero[byte_N] & ~(0x80); // aplico una mascara para poner en 0 el bit de la ficha original en byte N
+        unsigned char byte_n1limpio = tablero[byte_N+1] & ~(0x03);  // aplico una mascara para poner en 0 los bits de la ficha original en byte N+1
+        tablero[byte_N] = byte_nlimpio | nuevo_n; // agrego el nuevo valor al byte N
+        tablero[byte_N+1] = byte_n1limpio | nuevo_n1; //agrego el nuevo valor al byte N+1
+
+    }
 
 }
 
@@ -66,5 +96,4 @@ void destruir_tablero(unsigned char* &tablero){
         delete[] tablero;
         tablero = nullptr;
     }
-
 }
